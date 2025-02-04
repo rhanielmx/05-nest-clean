@@ -7,7 +7,7 @@ import {
   Put,
 } from '@nestjs/common'
 import { CurrentUser } from '@/infra/auth/current-user-decorator'
-import type { UserPayload } from '@/infra/auth/jwt.strategy'
+import { UserPayload } from '@/infra/auth/jwt.strategy'
 import { ZodValidationPipe } from '../pipes/zod-validation.pipe'
 import { z } from 'zod'
 import { EditQuestionUseCase } from '@/domain/forum/application/use-cases/edit-question'
@@ -15,7 +15,7 @@ import { EditQuestionUseCase } from '@/domain/forum/application/use-cases/edit-q
 const editQuestionBodySchema = z.object({
   title: z.string(),
   content: z.string(),
-  attachments: z.array(z.string().uuid()),
+  attachments: z.array(z.string().uuid()).default([]),
 })
 
 type EditQuestionBodySchema = z.infer<typeof editQuestionBodySchema>
