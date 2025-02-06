@@ -9,7 +9,7 @@ import { AnswerCommentFactory } from 'test/factories/make-answer-comment'
 import { QuestionFactory } from 'test/factories/make-question'
 import { StudentFactory } from 'test/factories/make-student'
 
-describe('Fetch answer answers (E2E)', () => {
+describe('Fetch answer comments (E2E)', () => {
   let app: INestApplication
   let questionFactory: QuestionFactory
   let answerFactory: AnswerFactory
@@ -41,13 +41,13 @@ describe('Fetch answer answers (E2E)', () => {
 
   test('[GET] /answers/:answerId/comments', async () => {
     const user = await studentFactory.makePrismaStudent()
-
+    
     const accessToken = jwt.sign({ sub: user.id.toString() })
-
+    
     const question = await questionFactory.makePrismaQuestion({
       authorId: user.id,
     })
-
+    
     const answer = await answerFactory.makePrismaAnswer({
       questionId: question.id,
       authorId: user.id,
@@ -65,7 +65,6 @@ describe('Fetch answer answers (E2E)', () => {
         answerId: answer.id,
       }),
     ])
-
     const answerId = answer.id.toString()
 
     const response = await request(app.getHttpServer())

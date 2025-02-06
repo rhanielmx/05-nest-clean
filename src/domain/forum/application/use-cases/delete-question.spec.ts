@@ -56,8 +56,6 @@ describe('Delete Question', () => {
       questionId: 'example-question',
     })
 
-    console.log(inMemoryQuestionAttachmentsRepository.items)
-
     expect(inMemoryQuestionsRepository.items).toHaveLength(0)
     expect(inMemoryQuestionAttachmentsRepository.items).toHaveLength(0)
   })

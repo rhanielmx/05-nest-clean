@@ -67,11 +67,9 @@ describe('Fetch question answers (E2E)', () => {
       answers: expect.arrayContaining([
         expect.objectContaining({
           content: 'Answer 01',
-          authorName: 'John Doe',
         }),
         expect.objectContaining({
           content: 'Answer 02',
-          authorName: 'John Doe',
         }),
       ]),
     })

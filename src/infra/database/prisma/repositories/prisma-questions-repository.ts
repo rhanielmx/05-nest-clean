@@ -1,12 +1,13 @@
-import { Injectable } from '@nestjs/common'
-import type { PaginationParams } from '@/core/repositories/pagination-params'
-import { Question } from '@/domain/forum/enterprise/entities/question'
+import { PaginationParams } from '@/core/repositories/pagination-params'
 import { QuestionsRepository } from '@/domain/forum/application/repositories/questions-repository'
-import { QuestionAttachmentsRepository } from '@/domain/forum/application/repositories/question-attachments-repository'
+import { Question } from '@/domain/forum/enterprise/entities/question'
+import { Injectable } from '@nestjs/common'
 import { PrismaService } from '../prisma.service'
 import { PrismaQuestionMapper } from '../mappers/prisma-question-mapper'
-import { PrismaQuestionDetailsMapper } from '../mappers/prisma-question-details-mapper'
+import { QuestionAttachmentsRepository } from '@/domain/forum/application/repositories/question-attachments-repository'
 import { QuestionDetails } from '@/domain/forum/enterprise/entities/value-objects/question-details'
+import { PrismaQuestionDetailsMapper } from '../mappers/prisma-question-details-mapper'
+import { DomainEvents } from '@/core/events/domain-events'
 
 @Injectable()
 export class PrismaQuestionsRepository implements QuestionsRepository {
@@ -50,8 +51,8 @@ export class PrismaQuestionsRepository implements QuestionsRepository {
       },
       include: {
         author: true,
-        attachments: true
-      }
+        attachments: true,
+      },
     })
 
     if (!question) {
@@ -83,26 +84,29 @@ export class PrismaQuestionsRepository implements QuestionsRepository {
     await this.questionAttachmentsRepository.createMany(
       question.attachments.getItems(),
     )
+
+    DomainEvents.dispatchEventsForAggregate(question.id)
   }
 
   async save(question: Question): Promise<void> {
     const data = PrismaQuestionMapper.toPrisma(question)
+
     await Promise.all([
       this.prisma.question.update({
-        data,
         where: {
-          id: data.id,
+          id: question.id.toString(),
         },
+        data,
       }),
-
       this.questionAttachmentsRepository.createMany(
         question.attachments.getNewItems(),
       ),
-
-      await this.questionAttachmentsRepository.deleteMany(
+      this.questionAttachmentsRepository.deleteMany(
         question.attachments.getRemovedItems(),
       ),
     ])
+
+    DomainEvents.dispatchEventsForAggregate(question.id)
   }
 
   async delete(question: Question): Promise<void> {
